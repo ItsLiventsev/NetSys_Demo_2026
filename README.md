@@ -44,7 +44,89 @@
 
 <img width="553" height="233" alt="image" src="https://github.com/user-attachments/assets/c56b716b-c55e-4002-81b7-db05f25736a6" />
 
+#### На всех устройствах необходимо сконфигурировать IPv4: • IP-адрес должен быть из приватного диапазона, в случае, если сеть локальная, согласно RFC1918 • Локальная сеть в сторону HQ-SRV(VLAN 100) должна вмещать не более 32 адресов • Локальная сеть в сторону HQ-CLI(VLAN 200) должна вмещать не менее 16 адресов • Локальная сеть для управления(VLAN 999) должна вмещать не более 8 адресов • Локальная сеть в сторону BR-SRV должна вмещать не более 16 адресов
 
+Далее необходимо настроить виртуальные сетевые адаптеры на ВМ, для этого переходим в настройки виртуальной машины, где добавляем необходимое по схеме кол-во сетевых адаптеров, а также прописываем сети в которых они будут работать, *ПРИМЕР НА ISP*
+
+<img width="914" height="628" alt="image" src="https://github.com/user-attachments/assets/16484a31-5a5a-4342-91f9-7fa0fbaaa552" />
+
+Настройки для других машин:
+
+HQ-SRV
+
+<img width="822" height="531" alt="image" src="https://github.com/user-attachments/assets/50dc1353-4d9d-4d54-8b72-44777add0f63" />
+
+HQ-CLI
+
+<img width="909" height="577" alt="image" src="https://github.com/user-attachments/assets/019d1de3-7241-415a-b98f-8ba9366f856d" />
+
+BR-RTR
+
+<img width="860" height="541" alt="image" src="https://github.com/user-attachments/assets/ecf0be23-0828-47f4-8395-259c97de296d" />
+
+BR-SRV
+
+<img width="864" height="587" alt="image" src="https://github.com/user-attachments/assets/d013a5f0-71b2-4527-9f3c-dc7eb2925ec9" />
+
+HQ-RTR
+
+<img width="869" height="558" alt="image" src="https://github.com/user-attachments/assets/f3de7848-60ad-4e2e-b94e-ceabf2e63a3f" />
+
+⚠️Сеть VM Network не представлена в задании, используется, если есть проблемы с выходом в интернет, т.е., через неё **напрямую** дается выход в интернет с любой машины, если на адаптере включить DHCP.
+
+Для проверки корректности сетевых адаптеров используем команду - ip -c a
+
+<img width="880" height="340" alt="image" src="https://github.com/user-attachments/assets/9037ad7c-504a-4d56-a82a-b97b56ba36a4" />
+
+Выводит список сетевых адаптеров. Далее через настройки ВМ, **ОБЯЗАТЕЛЬНО** сводим значения MAC-адресов, чтобы понять, какой сетевой адаптер куда подключается
+
+<img width="1914" height="974" alt="image" src="https://github.com/user-attachments/assets/20558794-79e4-4c46-8d91-ea8d977449d9" />
+
+#### Пример настройки сетевого адаптера для выхода на DHCP
+
+Открываем файл конфигурации сетевого адаптера
+
+<img width="541" height="38" alt="image" src="https://github.com/user-attachments/assets/a14f395a-c73c-4004-ad37-98ecf6d0c3cb" />
+
+В значении *BOOTPROTO* меням static на dhcp (МАЛЕНЬКИМИ БУКВАМИ)
+
+<img width="364" height="260" alt="image" src="https://github.com/user-attachments/assets/fac77d59-aac1-4b17-b272-9f435a2bf88c" />
+
+#### Пример настройки нового сетевого адаптера на статику
+
+Создаем новую директорию для конфигурации сетевого адаптера (НАЗВАНИЕ ДИРЕКТОРИИ, ПО ИМЕНИ СЕТЕВОГО АДАПТЕРА ИЗ КОМАНДЫ ip -c a)
+
+<img width="501" height="50" alt="image" src="https://github.com/user-attachments/assets/32544dc0-b614-425e-b594-05562ace7d27" />
+
+Копируем из базовой директории ens192 (есть всегда), файл конфигурации в новые директории для вновь созданных сетевых адаптеров
+
+<img width="764" height="43" alt="image" src="https://github.com/user-attachments/assets/c66d26cf-74a4-4551-bd0e-823d6f96bfb7" />
+
+Для статики оставляем *BOOTPROTO* = static
+
+<img width="667" height="343" alt="image" src="https://github.com/user-attachments/assets/73a75d10-b89d-46d4-be58-5229422080d7" />
+
+Создаем новый файл в папке с сетевым адаптером, для конфигурации IP-адреса
+
+<img width="577" height="30" alt="image" src="https://github.com/user-attachments/assets/25dcb3b0-30ac-4450-8bd9-a73bddb1b886" />
+
+Прописываем адрес с маской
+
+<img width="380" height="142" alt="image" src="https://github.com/user-attachments/assets/d619e7fe-e640-4067-8aff-d8e6f9dc3d1f" />
+
+⚠️В случае если, проставляем IP-адрес на конечном устройстве, или на маршрутизаторе в сторону ISP, НЕ ЗАБЫВАЕМ СТАВИТЬ ОСНОВНОЙ ШЛЮЗ, для этого создаем файл
+
+<img width="557" height="45" alt="image" src="https://github.com/user-attachments/assets/9485b3f8-1dad-4c6b-a2cb-f6ac35216203" />
+
+Прописываем только IP-адрес (БЕЗ МАСКИ), устройства куда нужно отправлять пакеты (ВЫШЕСТОЯЩЕЕ УСТРОЙСТВО ПО СХЕМЕ)
+
+<img width="402" height="226" alt="image" src="https://github.com/user-attachments/assets/317c266d-b963-42f8-be0f-41ac03a416af" />
+
+Для применения настроек (для перезагрузки сети), прописываем команду - systemctl restart network
+
+<img width="431" height="43" alt="image" src="https://github.com/user-attachments/assets/7b6e0ac4-8918-4c5d-9763-17daac3e18dd" />
+
+⚠️ДЛЯ ПРИМЕНЕНИЯ ИМЕНИ ХОСТА, НУЖНО ПЕРЕЗАГРУЗИТЬ ВМ - reboot (на клиенте через меню, графически)
 
 ### 2. Настройте доступ к сети Интернет, на маршрутизаторе ISP: • Настройте адресацию на интерфейсах: • Интерфейс, подключенный к магистральному провайдеру, получает адрес по DHCP • Настройте маршрут по умолчанию, если это необходимо • Настройте интерфейс, в сторону HQ-RTR, интерфейс подключен к сети 172.16.1.0/28 • Настройте интерфейс, в сторону BR-RTR, интерфейс подключен к сети 172.16.2.0/28 • На ISP настройте динамическую сетевую трансляцию портов для доступа к сети Интернет HQ-RTR и BR-RTR.
 
