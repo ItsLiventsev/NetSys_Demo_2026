@@ -278,20 +278,210 @@ useradd - создание пользователя
 
 <img width="495" height="275" alt="image" src="https://github.com/user-attachments/assets/998576ad-66f6-43ba-a2cc-402e99af9cc4" />
 
-### 4. Настройте коммутацию в сегменте HQ следующим образом: • Трафик HQ-SRV должен принадлежать VLAN 100 • Трафик HQ-CLI должен принадлежать VLAN 200 • Предусмотреть возможность передачи трафика управления в VLAN 999 • Реализовать на HQ-RTR маршрутизацию трафика всех указанных VLAN с использованием одного сетевого адаптера ВМ/физического порта • Сведения о настройке коммутации внесите в отчёт (ПОКА НЕ ТРОГАЕМ ЭТО ЗАДАНИЕ)
+### ⚠️4. Настройте коммутацию в сегменте HQ следующим образом: • Трафик HQ-SRV должен принадлежать VLAN 100 • Трафик HQ-CLI должен принадлежать VLAN 200 • Предусмотреть возможность передачи трафика управления в VLAN 999 • Реализовать на HQ-RTR маршрутизацию трафика всех указанных VLAN с использованием одного сетевого адаптера ВМ/физического порта • Сведения о настройке коммутации внесите в отчёт (ПОКА НЕ ТРОГАЕМ ЭТО ЗАДАНИЕ) - В СТЕНДЕ НЕ БУДЕТ ВИРТУАЛЬНОГО КОММУТАТОРА⚠️
 
 ### 5. Настройте безопасный удаленный доступ на серверах HQ-SRV и BR SRV: • Для подключения используйте порт 2026 • Разрешите подключения исключительно пользователю sshuser • Ограничьте количество попыток входа до двух • Настройте баннер «Authorized access only».
+
+Устанавливаем OpenSSH-server
+
+<img width="618" height="49" alt="image" src="https://github.com/user-attachments/assets/e2b7a58e-eb04-4a31-9ddb-ddb422d0580a" />
+
+Если выходит ошибка, прописываем systemctl daemon-reload
+
+<img width="678" height="142" alt="image" src="https://github.com/user-attachments/assets/f619a90b-f4e8-4638-9145-d901a36e3d98" />
+
+После чего повторно проводим команду на установку
+
+Добавляем сервис в автозагрузку systemctl enable —now sshd
+
+<img width="564" height="44" alt="image" src="https://github.com/user-attachments/assets/c25e3370-32ad-467b-9b7a-e1d58c90c66c" />
+
+Настройка файла конфигурации OpenSSH
+
+<img width="621" height="59" alt="image" src="https://github.com/user-attachments/assets/5640698a-e293-466e-bc48-db2e60b09aa9" />
+
+По заданию нужен порт 2026, поэтому меняем значение
+
+<img width="1020" height="511" alt="image" src="https://github.com/user-attachments/assets/13a629c1-47ba-4e0f-84f7-cfbdc056755e" />
+
+По заданию кол-во попыток 2, меняем значение
+
+<img width="382" height="81" alt="image" src="https://github.com/user-attachments/assets/4e01e63c-f74b-4d28-ac30-2b56f48a25b4" />
+
+Добавляем значение AllowUsers, куда по заданию прописываем только sshuser
+
+<img width="250" height="60" alt="image" src="https://github.com/user-attachments/assets/d74f3ebf-1be2-4c95-b277-8fcbeadf3a05" />
+
+Добавляем путь для баннера
+
+<img width="351" height="74" alt="image" src="https://github.com/user-attachments/assets/6e14c378-b5c8-4102-bb12-007537c80e17" />
+
+Создаем папку и файл в ней для баннера
+
+<img width="629" height="76" alt="image" src="https://github.com/user-attachments/assets/9744f240-088a-4730-84a7-b124b9ca9f4a" />
+
+Прописываем по заданию - Authorized access only
+
+<img width="575" height="214" alt="image" src="https://github.com/user-attachments/assets/7499bc53-6496-478e-a460-f06dcfb2b2ef" />
+
+Проверяем, видим что включен и порт поменялся
+
+<img width="990" height="386" alt="image" src="https://github.com/user-attachments/assets/f50e2c4a-e852-4825-b248-76f389158d10" />
+
+Для проверки подключения по SSH на другой машине пишем:
+
+ssh sshuser@192.168.2.3 -p 2026
+
+ssh sshuser@192.168.1.2 -p 2026
 
 ### 6. Между офисами HQ и BR, на маршрутизаторах HQ-RTR и BR-RTR необходимо сконфигурировать ip туннель: • На выбор технологии GRE или IP in IP • Сведения о туннеле занесите в отчёт.
 
 ### 7. Обеспечьте динамическую маршрутизацию на маршрутизаторах HQ RTR и BR-RTR: сети одного офиса должны быть доступны из другого офиса и наоборот. Для обеспечения динамической маршрутизации используйте link state протокол на усмотрение участника: • Разрешите выбранный протокол только на интерфейсах ip туннеля • Маршрутизаторы должны делиться маршрутами только друг с другом • Обеспечьте защиту выбранного протокола посредством парольной защиты • Сведения о настройке и защите протокола занесите в отчёт.
 
+apt-get update - обновление репозиториев
+
+<img width="1079" height="243" alt="image" src="https://github.com/user-attachments/assets/66e0c8db-f9c6-4249-955b-3892e6fe9e53" />
+
+apt-get install frr -y - устанавливаем пакет FRR
+
+<img width="1068" height="452" alt="image" src="https://github.com/user-attachments/assets/b5ed2f4b-2b10-4d40-aa7e-62ab6230fb81" />
+
+Заходим в файл конфигурации демонов FRR
+
+<img width="327" height="23" alt="image" src="https://github.com/user-attachments/assets/d3224633-5c26-4aeb-8a1a-40c847f56198" />
+
+Видим список протоколов
+
+<img width="168" height="305" alt="image" src="https://github.com/user-attachments/assets/00af27bf-5401-4346-81b7-b141ff4aaba6" />
+
+Изменяем значение eigrpd с no на yes
+
+<img width="247" height="321" alt="image" src="https://github.com/user-attachments/assets/3f652885-7352-492d-aabb-3ed67665e176" />
+
+Применяем новую конфигурацию, перезагружая сервис
+
+<img width="382" height="50" alt="image" src="https://github.com/user-attachments/assets/235362ed-31c4-48ba-a879-a246115ff235" />
+
+Проверяем, что FRR запустился
+
+<img width="1042" height="508" alt="image" src="https://github.com/user-attachments/assets/bcbf2b4e-79a0-4371-936b-687b8dd61099" />
+
+Заходим в управление FRR
+
+<img width="176" height="32" alt="image" src="https://github.com/user-attachments/assets/dee2c994-d1fe-4a93-ad84-da9f2a6e3fa0" />
+
+**СИНТАКСИС ВНУТРИ, КАК В CISCO**
+
+Настройка FRR для BR-RTR
+
+<img width="363" height="296" alt="image" src="https://github.com/user-attachments/assets/74bf5ab6-6fff-44bb-b08e-77e45658707f" />
+
+Настройка FRR для HQ-RTR
+
+<img width="325" height="383" alt="image" src="https://github.com/user-attachments/assets/23351034-56eb-4143-8a1e-d793c5d334be" />
+
+Настройка FRR для ISP
+
+<img width="320" height="278" alt="image" src="https://github.com/user-attachments/assets/a92e64fd-8162-4a95-8163-635e370c458c" />
+
+
 ### 8. Настройка динамической трансляции адресов маршрутизаторах HQ RTR и BR-RTR: • Настройте динамическую трансляцию адресов для обоих офисов в сторону ISP, все устройства в офисах должны иметь доступ к сети Интернет
+
+**ПРОЩЕ ТАК** - через файл:
+
+<img width="443" height="49" alt="image" src="https://github.com/user-attachments/assets/7d8b41c7-8fe9-4d2a-922f-d6d7dd8c6e0c" />
+
+Меняем значение ip_forward на 1
+
+<img width="231" height="38" alt="image" src="https://github.com/user-attachments/assets/c881f413-00b0-4a89-9e8c-6ed92895551e" />
+
+ПЕРЕЗАГРУЖАЕМСЯ
 
 ### 9. Настройте протокол динамической конфигурации хостов для сети в сторону HQ-CLI: • Настройте нужную подсеть • В качестве сервера DHCP выступает маршрутизатор HQ-RTR • Клиентом является машина HQ-CLI • Исключите из выдачи адрес маршрутизатора • Адрес шлюза по умолчанию – адрес маршрутизатора HQ-RTR • Адрес DNS-сервера для машины HQ-CLI – адрес сервера HQ-SRV • DNS-суффикс – au-team.irpo • Сведения о настройке протокола занесите в отчёт.
 
-### 10. Настройте инфраструктуру разрешения доменных имён для офисов HQ и BR: • Основной DNS-сервер реализован на HQ-SRV • Сервер должен обеспечивать разрешение имён в сетевые адреса устройств и обратно в соответствии с таблицей 3 • В качестве DNS сервера пересылки используйте любой общедоступный DNS сервер(77.88.8.7, 77.88.8.3 или другие)
+Устанавливаем DHCP-server
+
+<img width="647" height="56" alt="image" src="https://github.com/user-attachments/assets/aeb83485-966a-4732-bf14-907f4e60f233" />
+
+<img width="1181" height="107" alt="image" src="https://github.com/user-attachments/assets/3a4af180-c663-4ee6-82ce-3d94ae7f1512" />
+
+Переходим в файл конфигурации DHCP
+
+<img width="834" height="34" alt="image" src="https://github.com/user-attachments/assets/c3f22dbb-7348-4ba8-8825-13f06bc4f102" />
+
+Настройка выдачи DHCP
+
+<img width="605" height="337" alt="image" src="https://github.com/user-attachments/assets/a442690d-a654-4ebf-b551-f02445b03144" />
+
+Ставим выдачу DHCP только с опеделенного сетевого адаптера
+
+<img width="683" height="77" alt="image" src="https://github.com/user-attachments/assets/8b8e5e75-ca8f-4dfc-bdf1-7a5460946f84" />
+
+<img width="1420" height="1077" alt="image" src="https://github.com/user-attachments/assets/d10d7221-5f13-4a01-97ab-2e523a386444" />
+
+Проверяем, что DHCP заработал
+
+<img width="1404" height="552" alt="image" src="https://github.com/user-attachments/assets/2d126d70-58aa-42b5-be5b-92744fedeb03" />
+
+
+### 10. Настройте инфраструктуру разрешения доменных имён для офисов HQ и BR: • Основной DNS-сервер реализован на HQ-SRV • Сервер должен обеспечивать разрешение имён в сетевые адреса устройств и обратно в соответствии с таблицей 3 • В качестве DNS сервера пересылки используйте любой общедоступный DNS сервер(77.88.8.7, 77.88.8.3 или другие) (ЗОНА ОБРАТНОГО ПРОСМОТРА ПОКА НА ДОРАБОТКЕ)
 
 <img width="631" height="272" alt="image" src="https://github.com/user-attachments/assets/beb4fbab-9764-4252-afcc-03e6826a2db9" />
 
+Устанавливаем bind и утилиты
+
+<img width="654" height="46" alt="image" src="https://github.com/user-attachments/assets/b64d6097-8e52-434c-bcb1-a57c3b39049d" />
+
+<img width="638" height="70" alt="image" src="https://github.com/user-attachments/assets/5f1ab4f7-f0ed-4356-bdb5-7e5b1101dcee" />
+
+Меняем значение
+
+<img width="1348" height="1051" alt="image" src="https://github.com/user-attachments/assets/f7e6885d-3e0e-495c-9326-f24b2515e66f" />
+
+где:
+listen-on port 53 { any; }; — IP-сети DNS-сервера, на котором он будет принимать запросы; (можно прописать any - слушать везде)
+listen-on-v6 port 53 присвоим значение none, тем самым отключив IPv6
+allow-query разрешает выполнять запросы всем, но из соображений безопасности можно ограничить доступ для конкретной сети.
+forwarders перенаправляем запросы, которые сами не резолвим, на DNS сервер Яндекса.
+
+Добавляем зоны в данный файл
+
+<img width="745" height="54" alt="image" src="https://github.com/user-attachments/assets/69f6e79f-63e4-444a-b3cc-6c2cdbff3385" />
+
+<img width="1349" height="1045" alt="image" src="https://github.com/user-attachments/assets/f767273d-7687-45c9-8878-63933b2d81dd" />
+
+Проверяем, что нет ошибок
+
+<img width="445" height="38" alt="image" src="https://github.com/user-attachments/assets/e4d85eca-8709-4c25-a201-1004b3805592" />
+
+Создаем базы для зон
+
+База для зоны прямого просмотра
+
+<img width="672" height="50" alt="image" src="https://github.com/user-attachments/assets/f09d0d74-bc2b-4188-aaee-ad4f4a5cc411" />
+
+База для зоны обратного просмотра
+
+<img width="813" height="53" alt="image" src="https://github.com/user-attachments/assets/a75e4044-1a5b-44f8-a29f-72761a28ecba" />
+
+Пример заполнения базы данных для зоны прямого просмотра
+
+<img width="1282" height="1036" alt="image" src="https://github.com/user-attachments/assets/55275034-06e4-468f-b74b-d2350e03b767" />
+
+**НА ДОРАБОТКЕ**
+
+Пример заполнения базы данных для зоны обратного просмотра
+
+<img width="1267" height="1023" alt="image" src="https://github.com/user-attachments/assets/2ce18cc0-3b88-48cb-9383-5995043ce3c9" />
+
+..........
+
 ### 11. Настройте часовой пояс на всех устройствах (за исключением виртуального коммутатора, в случае его использования) согласно месту проведения экзамена
+
+Выставляем зону для Москвы на всех ВМ
+
+<img width="439" height="28" alt="image" src="https://github.com/user-attachments/assets/8d6b0159-b4f0-419a-9982-6ff312841bf4" />
+
+Если по заданию просят другой регион, то смотрим регионы по следующему пути
+
+<img width="1035" height="123" alt="image" src="https://github.com/user-attachments/assets/36f4d420-cc87-4f2f-b03e-162114a24702" />
