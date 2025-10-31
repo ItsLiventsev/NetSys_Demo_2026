@@ -405,11 +405,11 @@ apt-get install frr -y - устанавливаем пакет FRR
 
 <img width="1181" height="107" alt="image" src="https://github.com/user-attachments/assets/3a4af180-c663-4ee6-82ce-3d94ae7f1512" />
 
-Переходим в файл конфигурации DHCP
+Копируем файл конфигурации и называем его dhcpd.conf
 
 <img width="834" height="34" alt="image" src="https://github.com/user-attachments/assets/c3f22dbb-7348-4ba8-8825-13f06bc4f102" />
 
-Настройка выдачи DHCP
+Настройка выдачи DHCP, заходим в файл через mcedit
 
 <img width="605" height="337" alt="image" src="https://github.com/user-attachments/assets/a442690d-a654-4ebf-b551-f02445b03144" />
 
