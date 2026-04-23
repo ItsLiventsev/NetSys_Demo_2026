@@ -334,7 +334,210 @@ ssh sshuser@192.168.2.3 -p 2026
 
 ssh sshuser@192.168.1.2 -p 2026
 
-### 6. Между офисами HQ и BR, на маршрутизаторах HQ-RTR и BR-RTR необходимо сконфигурировать ip туннель: • На выбор технологии GRE или IP in IP • Сведения о туннеле занесите в отчёт.
+### 6. Между офисами HQ и BR, на маршрутизаторах HQ-RTR и BR-RTR необходимо сконфигурировать ip туннель: • На выбор технологии GRE или IP in IP • Сведения о туннеле занесите в отчёт. (СЕТИ СТАВИМ НА СВОИ, ПОКА В НАСТРОЙКЕ СЕТИ ЛЕВЫЕ)
+Настройка динамической маршрутизации
+
+#### Настройка туннеля GRE и OSPF на HQ-RTR
+
+1. **Создание интерфейса туннеля**
+
+   Создайте каталог для интерфейса туннеля:
+   ```bash
+   mkdir /etc/net/ifaces/gre1
+   ```
+
+2. **Настройка файла options для туннеля**
+
+   Создайте и отредактируйте файл:
+   ```bash
+   mcedit /etc/net/ifaces/gre1/options
+   ```
+   У вас ip могут отличаться
+   Пример содержимого:
+   ```
+   TUNLOCAL=172.16.4.2
+   TUNREMOTE=172.16.5.2
+   TUNTYPE=gre
+   TYPE=iptun
+   TUNOPTIONS='ttl 64'
+   HOST=ens192
+   ```
+
+3. **Настройка IP-адреса туннеля**
+
+   Создайте файл:
+   ```bash
+   mcedit/etc/net/ifaces/gre1/ipv4address
+   ```
+   Пример:
+   ```
+   172.16.100.2/29
+   ```
+
+4. Перезагрузите сеть и проверьте интерфейс:
+   ```bash
+   systemctl restart network
+   ip a
+   ```
+
+5. **Настройка frr**
+
+   Добавьте службу `frr` в автозагрузку:
+   ```bash
+   systemctl enable --now frr
+   ```
+   Отредактируйте конфигурационный файл демонов:
+   ```bash
+   mcedit /etc/frr/daemons
+   ```
+     - Меняем ospfd:
+     ```diff
+     -#ospfd=no
+     +ospfd=yes
+     ```
+   Сохраните изменения.
+   
+   Перезагрузите службу frr:
+   ```
+   systemctl reboot frr
+   ```
+
+6. **Настройка OSPF через vtysh**
+
+   Введите:
+   ```bash
+   vtysh
+   ```
+   Комнды для настройки ospf
+   ```
+   show running-config (чтобы проверить если там что нибудь или нет)
+   conf t
+   router ospf
+     passive interface default
+     network 172.16.100.0/29 area 0 сеть тунеля 
+     network 192.168.10.0/26 area 0 сеть в сторону hq-srv 
+     network 192.168.20.0/28 area 0 сеть в сторону hq-сli
+     area 0 authentication
+   exit
+   interface gre1 тут вы указывете название вашего тунеля между hq-rtr и br-rtr
+     no ip ospf passive
+     ip ospf authentication-key 1245 ваш ключ  
+   exit
+   do wr
+   end
+   exit
+   ```
+   Перезагрузите сеть:
+   ```bash
+   systemctl restart network
+   ```
+
+#### Настройка туннеля GRE и OSPF на BR-RTR
+
+<details>
+  <summary>Развернуть инструкцию</summary>
+
+1. **Создание интерфейса туннеля**
+
+   Создайте каталог:
+   ```bash
+   mkdir /etc/net/ifaces/gre1
+   ```
+
+2. **Настройка файла options для туннеля**
+
+   Создайте и отредактируйте файл:
+   ```bash
+   mcedit /etc/net/ifaces/gre1/options
+   ```
+   Пример содержимого:
+   ```
+   TUNLOCAL=172.16.5.2
+   TUNREMOTE=172.16.4.2
+   TUNTYPE=gre
+   TYPE=iptun
+   TUNOPTIONS='ttl 64'
+   HOST=ens192
+   ```
+
+3. **Настройка IP-адреса туннеля**
+
+   Создайте файл:
+   ```bash
+   mcedit /etc/net/ifaces/gre1/ipv4address
+   ```
+   Пример:
+   ```
+   172.16.100.1/29
+   ```
+
+4. Перезагрузите сеть:
+   ```bash
+   systemctl restart network
+   ip a
+   ```
+
+5. **Настройка frr**
+
+   Добавьте службу `frr` в автозагрузку:
+   ```bash
+   systemctl enable --now frr
+   ```
+   Отредактируйте конфигурационный файл демонов:
+   ```bash
+   mcedit /etc/frr/daemons
+   ```
+     - Меняем ospfd:
+   ```diff
+   -#ospfd=no
+   +ospfd=yes
+   ```
+   Сохраните изменения.
+   
+   Перезагрузите службу frr:
+   ```
+   systemctl reboot frr
+   ```
+5. **Настройка OSPF через vtysh**
+
+   Введите:
+   ```bash
+   vtysh
+   ```
+   Комнды для настройки ospf
+   ```
+   show running-config (чтобы проверить если там что нибудь или нет)
+   conf t
+   router ospf
+     passive interface default
+     network 172.16.100.0/29 area 0 сеть тунеля 
+     network 192.168.30.0/27 area 0 сеть в сторону br-rtr
+     area 0 authentication
+   exit
+   interface gre1 тут вы указывете название вашего тунеля между hq-rtr и br-rtr
+     no ip ospf passive
+     ip ospf authentication-key 1245 ваш ключ  
+   exit
+   do wr
+   end
+   exit
+   ```
+9. Перезагрузите сеть:
+   ```bash
+   systemctl restart network
+   ```
+10. Проверьте настройки:
+    ```bash
+    vtysh
+    show ip ospf neighbor
+    ```
+    Если сосед отображается – настройка выполнена корректно.
+
+</details>
+
+---
+
+
 
 ### 7. Обеспечьте динамическую маршрутизацию на маршрутизаторах HQ RTR и BR-RTR: сети одного офиса должны быть доступны из другого офиса и наоборот. Для обеспечения динамической маршрутизации используйте link state протокол на усмотрение участника: • Разрешите выбранный протокол только на интерфейсах ip туннеля • Маршрутизаторы должны делиться маршрутами только друг с другом • Обеспечьте защиту выбранного протокола посредством парольной защиты • Сведения о настройке и защите протокола занесите в отчёт.
 
