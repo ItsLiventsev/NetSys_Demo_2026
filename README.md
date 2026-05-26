@@ -399,7 +399,7 @@ ssh sshuser@192.168.1.2 -p 2026
    
    Перезагрузите службу frr:
    ```
-   systemctl reboot frr
+   systemctl restart frr
    ```
 
 6. **Настройка OSPF через vtysh**
