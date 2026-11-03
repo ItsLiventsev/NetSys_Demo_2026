@@ -1,0 +1,14 @@
+# Бинарные артефакты: не показывать построчный diff
+*.pdf  binary
+*.odt  binary
+*.xlsx binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+
+# Архив — сторонний материал, не учитывать в статистике языков GitHub
+archive/** linguist-vendored
+
+# Документация — не считать «кодом»
+docs/** linguist-documentation

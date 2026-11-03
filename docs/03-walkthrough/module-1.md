@@ -690,3 +690,7 @@ forwarders перенаправляем запросы, которые сами 
 Если по заданию просят другой регион, то смотрим регионы по следующему пути
 
 <img width="1035" height="123" alt="image" src="https://github.com/user-attachments/assets/36f4d420-cc87-4f2f-b03e-162114a24702" />
+
+---
+
+[← Документация](../README.md) | [Оглавление разборов](README.md) | [Модуль 2 →](module-2-task-1-samba-dc.md)
