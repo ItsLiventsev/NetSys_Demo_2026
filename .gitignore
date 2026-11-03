@@ -1,0 +1,14 @@
+# Служебный мусор ОС и редакторов
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
+.idea/
+
+# Временные файлы при работе с отчётами
+*.tmp
+*.bak
+~$*.odt
+~$*.docx
